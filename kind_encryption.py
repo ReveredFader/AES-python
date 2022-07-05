@@ -88,8 +88,11 @@ def remove_data(all_files) -> None:
         case 2:
             for file in all_files:
                 print("{} ".format(file.split('\\')[-1]), end='')
-                os.remove(file)
-                print(termcolor.colored("  done", "green"))
+                try:
+                    os.remove(file)
+                    print(termcolor.colored("  done", "green"))
+                except FileNotFoundError:
+                    print(termcolor.colored("  файл не найден", "red"))
         case _:
             return
         
@@ -163,8 +166,11 @@ def decrypt_data(key) -> None:
             try:
                 choice = int(choice)
                 if choice == 1:
-                    os.remove(path)
-                    print("Готово!")
+                    try:
+                        os.remove(path)
+                        print(termcolor.colored("Готово!", "green"))
+                    except FileNotFoundError:
+                        print(termcolor.colored("Файл не найден!", "red"))
                 else:
                     print("Хорошо, удалять не будем")
             except:
@@ -220,7 +226,7 @@ def main():
     time.sleep(4)
     # Получаем пароль
     password = get_password()
-    # Шифруем алгоритмом sha256
+    # Получаем хеш алгоритмом sha256
     key = hashing_password(password)
     
     while True:
@@ -238,7 +244,7 @@ def main():
         match choice:
             case 1:
                 if submit_pass() != key:
-                    print("Кажется пароль, не совпал с тем, что ты ввел вначале")
+                    print("Кажется пароль, не совпал с тем, что был введен вначале")
                     time.sleep(3)
                     continue
                 encrypt_data(key)    
