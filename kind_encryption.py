@@ -1,4 +1,5 @@
 from Crypto.Cipher import AES
+# from attr import s
 from secure_delete import secure_delete
 import getpass
 import hashlib
@@ -88,7 +89,7 @@ def remove_data(all_files):
                 print(termcolor.colored("  done", "green"))
         case 2:
             for file in all_files:
-                print("Удаляем исходник... ", end='')
+                print("{} ".format(file.split('\\')[-1]), end='')
                 os.remove(file)
                 print(termcolor.colored("  done", "green"))
         case _:
