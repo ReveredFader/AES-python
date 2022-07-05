@@ -1,5 +1,4 @@
 from Crypto.Cipher import AES
-# from attr import s
 from secure_delete import secure_delete
 import getpass
 import hashlib
@@ -11,11 +10,12 @@ import termcolor
 
 def hashing_password(password: str):
     """ Хеширование пароля """
-    password = bytes(password, encoding='utf-8')
-    return hashlib.sha256(password).digest()
+    bytes_password = bytes(password, encoding='utf-8')
+    return hashlib.sha256(bytes_password).digest()
 
 
-def get_password():
+def get_password() -> str:
+    """ Получение пароля """
     os.system('cls')
     print("Введите пароль ниже")
     
@@ -28,9 +28,8 @@ def get_password():
     return password
 
 
-def encrypt_file(key, in_filename, out_filename=None, chunksize=64*1024) -> None:
-    if not out_filename:
-        out_filename = in_filename + '.kind'
+def encrypt_file(key, in_filename:str, chunksize=64*1024) -> None:
+    out_filename = in_filename + '.kind'
     
     iv = os.urandom(64)
     encryptor = AES.new(key, AES.MODE_EAX, iv)
@@ -51,9 +50,8 @@ def encrypt_file(key, in_filename, out_filename=None, chunksize=64*1024) -> None
                 outfile.write(encryptor.encrypt(chunk))
 
 
-def decrypt_file(key, in_filename, out_filename=None, chunksize=24*1024):
-    if not out_filename:
-        out_filename = os.path.splitext(in_filename)[0]
+def decrypt_file(key, in_filename: str, chunksize=24*1024) -> None:
+    out_filename = os.path.splitext(in_filename)[0]
 
     with open(in_filename, 'rb') as infile:
         origsize = struct.unpack('<Q', infile.read(struct.calcsize('Q')))[0]
@@ -69,7 +67,7 @@ def decrypt_file(key, in_filename, out_filename=None, chunksize=24*1024):
 
             outfile.truncate(origsize)
 
-def remove_data(all_files):
+def remove_data(all_files) -> None:
     choice = input("Файлы зашифрованы, что делаем с оригиналом?\n\
                 1) Безопасно удалить оригинал (безопасно)\n\
                 2) Удалить оригинал обычным способом (небезопасно)\n\
@@ -94,7 +92,6 @@ def remove_data(all_files):
                 print(termcolor.colored("  done", "green"))
         case _:
             return
-        
         
     print("Готово!")
     time.sleep(3)
@@ -165,18 +162,17 @@ def decrypt_data(key) -> None:
             choice = input("1) Удалить исходник? (проверьте, правильно ли расшифрован файл)\n2) Не удалять\n-->  ")
             try:
                 choice = int(choice)
-                if choice != 1:
-                    choice = 2
+                if choice == 1:
+                    os.remove(path)
+                    print("Готово!")
+                else:
+                    print("Хорошо, удалять не будем")
             except:
-                choice = 2
-            
-            if choice == 1:
-                os.remove(path)
-                print("Готово!")
-            else:
-                print("Хорошо, удалять не будем")
+                print("Неясно, что вы ввели, но файл не будет удален")
+                
             time.sleep(3)
             return
+        
         elif os.path.isdir(path):
             all_files = []
             for root, dirs, files in os.walk(path):
@@ -195,17 +191,15 @@ def decrypt_data(key) -> None:
             choice = input("1) Удалить исходники? (проверьте, правильно ли расшифрованы файлы)\n2) Не удалять\n-->  ")
             try:
                 choice = int(choice)
-                if choice != 1:
-                    choice = 2
+                if choice == 1:
+                    for file in all_files:
+                        os.remove(file)
+                    print("Готово!")
+                else:
+                    print("Хорошо, удалять не будем")
             except:
-                choice = 2
+                print("Неясно, что вы ввели, но файлы не будут удалены")
                 
-            if choice == 1:
-                for file in all_files:
-                    os.remove(file)
-                print("Готово!")
-            else:
-                print("Хорошо, удалять не будем")
             time.sleep(3)
             return
         else:
